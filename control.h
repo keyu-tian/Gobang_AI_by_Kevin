@@ -1,3 +1,9 @@
+/**
+ * Author: Kevin
+ * Date: 2018-06-03
+ * Description: 游戏控制 
+ */
+
 #ifndef _CONTROL_H
 #define _CONTROL_H
 
