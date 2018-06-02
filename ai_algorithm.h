@@ -1,3 +1,9 @@
+/**
+ * Author: Kevin
+ * Date: 2018-06-03
+ * Description: AI关键算法
+ */
+
 #ifndef _AI_ALGORITHM_H
 #define _AI_ALGORITHM_H
 
