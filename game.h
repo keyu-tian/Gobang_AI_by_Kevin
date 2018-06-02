@@ -1,3 +1,9 @@
+/**
+ * Author: Kevin
+ * Date: 2018-06-03
+ * Description: 游戏主要框架 
+ */
+
 #ifndef _GAME_H
 #define _GAME_H
 
