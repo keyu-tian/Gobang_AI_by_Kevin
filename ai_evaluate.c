@@ -2,20 +2,20 @@
 #include "ai_evaluate.h"
 
 // 定义14种棋型分数 
-const int C5Score   =  135000; // 连五
-const int A4Score   =  50000;  // 活四
+const int C5Score   =  135000;   // 连五
+const int A4Score   =  50000;    // 活四
 const int P4Score   =  7000;	 // 冲四
 const int DP4Score  =  20050;	 // 双冲四
 const int P4TA3Score=  18500;	 // 冲四活三
 const int TA3Score  =  5100;	 // 真活三
 const int DTA3Score =  15000;	 // 双真活三
-const int FA3Score  =  449;    // 伪活三
-const int TS3Score  =  500;		 // 真眠三
-const int FS3Score  =  274;		 // 伪眠三
-const int TA2Score  =  400;		 // 真活二
-const int FA2Score  =  99;		 // 伪活二
-const int TS2Score  =  175;		 // 真眠二
-const int FS2Score  =  49;		 // 伪眠二
+const int FA3Score  =  449;      // 伪活三
+const int TS3Score  =  500;      // 真眠三
+const int FS3Score  =  274;	 // 伪眠三
+const int TA2Score  =  400;      // 真活二
+const int FA2Score  =  99;       // 伪活二
+const int TS2Score  =  175;      // 真眠二
+const int FS2Score  =  49;       // 伪眠二
 
 
 // 哈希表 存储当前棋型
