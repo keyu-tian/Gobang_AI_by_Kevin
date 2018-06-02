@@ -395,6 +395,7 @@ int EvalPrior(int x, int y, int NowPlayer)
 	    if (NowType.P4>=2)
 	    	return DP4Score;
 	}
+
 	// 双真活三
  	NowType.TA3 = (cnth == 3 && ( lf>=2&&rt || rt>=2&&lf )) +
 			      (cntv == 3 && ( up>=2&&dw || dw>=2&&up )) +
