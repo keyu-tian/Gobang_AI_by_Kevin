@@ -13,15 +13,15 @@ enum KEYBOARDOPERATOR {
     BACKSPACE= 8,
 };
 
-extern Point cursor;			// 坐标 
-extern int player, rnd;			// 行棋方和回合 
-extern char offensive;			// 先手方
+extern Point cursor;            // 坐标 
+extern int player, rnd;         // 行棋方和回合 
+extern char offensive;          // 先手方
 
-int ModeSelect();				// 游戏模式选择 
-void BoardInit(int mode);		// 棋局初始化 
-void BoardPrint(int mode);		// 打印棋局主界面 
-void MenuPrint();				// 打印菜单主界面 
-void GotoXY(short x,short y);	// Shell光标控制 
-void MoveCursor(char key);		// 光标移动
+int ModeSelect();               // 游戏模式选择 
+void BoardInit(int mode);       // 棋局初始化 
+void BoardPrint(int mode);      // 打印棋局主界面 
+void MenuPrint();               // 打印菜单主界面 
+void GotoXY(short x,short y);   // Shell光标控制 
+void MoveCursor(char key);      // 光标移动
 
 #endif
