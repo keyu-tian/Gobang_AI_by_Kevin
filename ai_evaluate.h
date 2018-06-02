@@ -1,3 +1,9 @@
+/**
+ * Author: Kevin
+ * Date: 2018-06-03
+ * Description: 分数评估 
+ */
+
 #ifndef _AI_EVALUATE_H
 #define _AI_EVALUATE_H
 
