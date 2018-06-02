@@ -1,3 +1,9 @@
+/**
+ * Author: Kevin
+ * Date: 2018-06-03
+ * Description: 基础声明 
+ */
+
 #ifndef _BASE_H
 #define _BASE_H
 
