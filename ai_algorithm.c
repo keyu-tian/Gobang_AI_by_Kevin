@@ -52,7 +52,7 @@ int MinMaxSearch(int x, int y, int NowPlayer, int depth, int alpha, int beta)
 				}
 				alpha = score;
 			}
-			if (alpha >= beta)   		// Alpha-剪枝
+			if (alpha >= beta)   			// Alpha-剪枝
 			{
 				return alpha;
 			}
@@ -79,7 +79,7 @@ int MinMaxSearch(int x, int y, int NowPlayer, int depth, int alpha, int beta)
 			{
 				beta = score ;
 			}
-			if (alpha >= beta)   		// Beta-剪枝
+			if (alpha >= beta)   			// Beta-剪枝
 			{
 				return beta ;
 			}
@@ -117,7 +117,7 @@ int HeuriSearchChoices( Choice* AvaChoices )
 					AvaChoices[num].prior = 
 						EvalPrior(i, j, AI)
 					  + EvalPrior(i, j, PLY);// 根据 ai_evaluate.h 中的 EvalPrior 函数 
-											 // 对当前待落子点进行优先级评估
+								// 对当前待落子点进行优先级评估
 					num++;
 				}
 
@@ -137,7 +137,7 @@ int HeuriSearchChoices( Choice* AvaChoices )
 		else break;
 	}
 
-	if( KillNum && KillNum+5<num ) // 出现杀棋时 进行剪枝
+	if( KillNum && KillNum+5<num )				// 出现杀棋时 进行剪枝
 		num = KillNum + 5 ;
 	return num;
 }
@@ -188,7 +188,7 @@ Chess RandFirst()
 	return ret;
 }
 
-// 胜负判断 
+// 胜负判断，判断NowPlayer是否获胜（构成连五）
 int Win(int x, int y, int NowPlayer)
 {
 	int r, c, cnt;
