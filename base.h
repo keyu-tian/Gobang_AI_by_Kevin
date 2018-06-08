@@ -16,23 +16,23 @@ extern char (*const board)[LEN];
 extern const char WEIGHT[LEN][LEN];
 
 struct _Point {
-	int x;
-	int y;
+    int x;
+    int y;
 };
 typedef struct _Point Point;
 
 struct _Chess {
-	int r;
-	int c;
+    int r;
+    int c;
 };
 typedef struct _Chess Chess;
 
 extern Chess AIChoice;
 
 struct _Choice {
-	int r;
-	int c;
-	int prior;
+    int r;
+    int c;
+    int prior;
 };
 typedef struct _Choice Choice;
 
