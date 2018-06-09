@@ -118,7 +118,7 @@ void ScanLine(const int* const Line, int n)
 	{
 		if ( Line[i] )
 		{
-//  利用 FinalPos 记录始端位置 
+//  利用 InitPos 记录始端位置 
 			InitPos = i-1;
 			NowPlayer = Line[i];
 
