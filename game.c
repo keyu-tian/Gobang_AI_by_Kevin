@@ -7,23 +7,23 @@
 #include "control.h"
 #include "ai_algorithm.h"
 
-const int INF = 9999999;			// A-B剪枝的初始化极值
+const int INF = 9999999;                        // A-B剪枝的初始化极值
 
-const char* OFS = "●";				// 黑方棋子
+const char* OFS = "●";                          // 黑方棋子
 const char* DEF = "○";				// 白方棋子
-int player, rnd;					// 记录行棋方和回合
-char offensive;						// 记录先手方
+int player, rnd;                                // 记录行棋方和回合
+char offensive;                                 // 记录先手方
 
 char __board [LEN+4][LEN+4];
 char (*const board)[LEN] =
-    (char (*const)[LEN])&__board[2][2];	// 棋盘 
+    (char (*const)[LEN])&__board[2][2];         // 棋盘 
 
-const Point BoardCenter = {7,9};	// 棋盘正中位置坐标（屏幕坐标系）
-Point cursor;						// 光标位置坐标 （屏幕坐标系）
+const Point BoardCenter = {7,9};                // 棋盘正中位置坐标（屏幕坐标系）
+Point cursor;                                   // 光标位置坐标 （屏幕坐标系）
 
-Chess AIChoice;						// 记录最高评分位置 
+Chess AIChoice;                                 // 记录最高评分位置 
 
-const char WEIGHT[LEN][LEN] =		// 棋盘位置权重
+const char WEIGHT[LEN][LEN] =                   // 棋盘位置权重
 {
 
 	{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0},
@@ -48,12 +48,12 @@ const char WEIGHT[LEN][LEN] =		// 棋盘位置权重
 void AIGame()
 {
 	int IsFirstRound;
-	char key;				// 记录玩家键盘输入
-	Point NowChess;		    // 记录当前落子点
+	char key;                                // 记录玩家键盘输入
+	Point NowChess;                          // 记录当前落子点
 
 	while (1)
 	{
-		BoardInit(1);		// 棋盘初始化
+		BoardInit(1);                    // 棋盘初始化
 		IsFirstRound = 1;
 		if ( offensive=='a' )
 		{
@@ -62,9 +62,9 @@ void AIGame()
 
 		while (1)
 		{
-			key = _getch(); // 利用不回显函数 _getch() 即时获取玩家输入
+			key = _getch();           // 利用不回显函数 _getch() 即时获取玩家输入
 
-			if ( IsFirstRound ) // 第一回合的初始化
+			if ( IsFirstRound )       // 第一回合的初始化
 			{
 				cursor = BoardCenter;
 				IsFirstRound = 0;
@@ -212,15 +212,15 @@ void FriendsGame()
 
 	while (1)
 	{
-		BoardInit(2);		// 棋盘初始化
+		BoardInit(2);                        // 棋盘初始化
 		IsFirstRound = 1;
 
 		while (1)
 		{
 
-			key = _getch(); // 利用不回显函数 _getch() 即时获取玩家输入
+			key = _getch();              // 利用不回显函数 _getch() 即时获取玩家输入
 
-			if ( IsFirstRound ) // 第一回合的初始化
+			if ( IsFirstRound )          // 第一回合的初始化
 			{
 				cursor = BoardCenter;
 				IsFirstRound = 0;
