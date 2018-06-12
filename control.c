@@ -97,13 +97,13 @@ int ModeSelect()		// 游戏模式选择，0--佩棋先手，1--佩棋后手，2-
 	return mode-'0';
 }
 
-void GotoXY(short x,short y) // Shell的光标控制 
+void GotoXY(short x,short y)    // Shell的光标控制 
 {
 	COORD c= {x,y};
 	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE),c);
 }
 
-void MoveCursor(char key) // 光标移动 
+void MoveCursor(char key)       // 光标移动 
 {
 	switch (key)
 	{
