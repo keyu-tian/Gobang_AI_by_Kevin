@@ -7,20 +7,17 @@ int main()
 	system("mode con cols=100 lines=36");
 	int mode;
 
-	while (1) {
-
+	while (1)
+	{
 		MenuPrint();
-		while (1) {
 
-			mode = ModeSelect();
+		mode = ModeSelect();
 
-			if(mode==2)
-				FriendsGame();
-			else
-				AIGame();
+		if(mode==2)
+			FriendsGame();
+		else
+			AIGame();
 
-			break;
-		}
 		system("cls");
 	}
 
