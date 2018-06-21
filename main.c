@@ -14,9 +14,9 @@ int main()
 		mode = ModeSelect();
 
 		if(mode==2)
-			FriendsGame();
+			FriendsGame(mode);
 		else
-			AIGame();
+			AIGame(mode);
 
 		system("cls");
 	}
