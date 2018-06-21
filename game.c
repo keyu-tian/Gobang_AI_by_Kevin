@@ -45,7 +45,7 @@ const char WEIGHT[LEN][LEN] =                   // 棋盘位置权重
 };
 
 
-void AIGame()
+void AIGame(int mode)
 {
 	int IsFirstRound;
 	char key;                                // 记录玩家键盘输入
@@ -53,7 +53,7 @@ void AIGame()
 
 	while (1)
 	{
-		BoardInit(1);                    // 棋盘初始化
+		BoardInit(mode);                 // 棋盘初始化
 		IsFirstRound = 1;
 		if ( offensive=='a' )
 		{
@@ -62,9 +62,9 @@ void AIGame()
 
 		while (1)
 		{
-			key = _getch();           // 利用不回显函数 _getch() 即时获取玩家输入
+			key = _getch();          // 利用不回显函数 _getch() 即时获取玩家输入
 
-			if ( IsFirstRound )       // 第一回合的初始化
+			if ( IsFirstRound )      // 第一回合的初始化
 			{
 				cursor = BoardCenter;
 				IsFirstRound = 0;
@@ -205,14 +205,14 @@ Point AITurn()
 
 
 
-void FriendsGame()
+void FriendsGame(int mode)
 {
 	int IsFirstRound = 0;
 	char key;
 
 	while (1)
 	{
-		BoardInit(2);                        // 棋盘初始化
+		BoardInit(mode);                     // 棋盘初始化
 		IsFirstRound = 1;
 
 		while (1)
