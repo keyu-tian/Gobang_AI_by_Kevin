@@ -52,7 +52,9 @@ void BoardPrint(int mode)		// 打印棋局主界面
 	printf("【  新游戏：  n         】");
 	GotoXY(65,18);
 	printf("【  主菜单：  Backspace 】");
-	
+	GotoXY(65,21);
+	printf("【  退出：    ESC       】");
+
 }
 
 void MenuPrint()		// 打印菜单界面 
