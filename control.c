@@ -8,16 +8,16 @@
 void BoardInit(int mode)		// 初始化棋局 
 {
 	int i, j;
-	memset(__board,0,sizeof(__board));
 	rnd = 0;
+	memset(__board,0,sizeof(__board));
 	system("cls");
 	BoardPrint(mode);
-	
+
 	if ( mode==0 )
 		player = AI;
 	else if ( mode==1 )
 		player = PLY;
-	else
+	else // if ( mode==2 )
 		player = PLY2;
 	
 	cursor.x = 25;
@@ -28,14 +28,14 @@ void BoardInit(int mode)		// 初始化棋局
 void BoardPrint(int mode)		// 打印棋局主界面 
 {
 	int i, j;
-	if (mode==1)
+	if ( mode==0||mode==1 )
 		printf("\n\n               【 与  小猪佩棋  对弈中...】\n\n");
 	else
 		printf("\n\n               【 与  你的小伙伴  对弈中...】\n\n");
 
-	for (j = 0; j<LEN; j++)
+	for (j=0; j<LEN; j++)
 	{
-		for (i = 0; i<LEN; i++)
+		for (i=0; i<LEN; i++)
 		{
 			printf("+   ");
 		}
@@ -63,11 +63,12 @@ void MenuPrint()		// 打印菜单界面
 	printf("                                 【  佩棋先手：0  】 \n\n");
 	printf("                                 【  佩棋后手：1  】 \n\n");
 	printf("                                 【  双人对弈：2  】 \n\n");
+	printf("                                 【   退出：ESC   】 \n\n");
 	printf("\n\n\n\n\n");
 	GotoXY(52,20);
 }
 
-int ModeSelect()		// 游戏模式选择，0--佩棋先手，1--佩棋后手，2--双人对弈 
+int ModeSelect()		// 游戏模式选择，0--佩棋先手，1--佩棋后手，2--双人对弈 ，ESC--退出
 {
 	char mode;
 	while(mode = _getch())
@@ -94,7 +95,7 @@ int ModeSelect()		// 游戏模式选择，0--佩棋先手，1--佩棋后手，2-
 			break;
 		}
 	}
-	return mode-'0';
+	return mode - '0';
 }
 
 void GotoXY(short x,short y)    // Shell的光标控制 
@@ -137,5 +138,5 @@ void MoveCursor(char key)       // 光标移动
 			break;
 	}
 
-	GotoXY(4*cursor.x, 2*cursor.y);
+	GotoXY(4*cursor.x, 2*cursor.y);		// 按比例放大输出字符
 }
