@@ -1,454 +1,233 @@
-#include <string.h>
+#include <stdlib.h>
+#include <time.h>
+#include "ai_algorithm.h"
 #include "ai_evaluate.h"
 
-// 定义14种棋型分数 
-const int C5Score   =  135000;   // 连五
-const int A4Score   =  50000;    // 活四
-const int P4Score   =  7000;	 // 冲四
-const int DP4Score  =  20050;	 // 双冲四
-const int P4TA3Score=  18500;	 // 冲四活三
-const int TA3Score  =  5100;	 // 真活三
-const int DTA3Score =  15000;	 // 双真活三
-const int FA3Score  =  449;      // 伪活三
-const int TS3Score  =  500;      // 真眠三
-const int FS3Score  =  274;	 // 伪眠三
-const int TA2Score  =  400;      // 真活二
-const int FA2Score  =  99;       // 伪活二
-const int TS2Score  =  175;      // 真眠二
-const int FS2Score  =  49;       // 伪眠二
+const int WinScore = 140000;	// 与 C5Score 保持同步
+const int KillScore = 15100;	// 与DTA3Score保持同步
+const int Difficulty = 5;		// 设定AI难度
 
 
-// 哈希表 存储当前棋型
-typedef struct _HashTable{
-
-	char C5;		// 连五
-	char A4;		// 活四 
-	char P4;		// 冲四 
-	char DP4;		// 双冲四
-	char P4TA3;		// 冲四活三
-	char TA3;		// 真活三 
-	char DTA3;		// 双真活三 
-	char FA3;		// 伪活三 
-	char TS3;		// 真眠三 
-	char FS3;		// 伪眠三 
-	char TA2;		// 真活二 
-	char FA2;		// 伪活二 
-	char TS2;		// 真眠二 
-	char FS2;		// 伪眠二 
-
-} HashTable;
-
-HashTable __ChessType[3];
-HashTable *const ChessType = __ChessType + 1;	
-// 指针形式引用 便于操作
-// ChessType[AI] 记录 AI 当前棋型 
-// ChessType[PLY]记录玩家当前棋型 
-
-
-
-// 分析棋盘纵向15路棋型
-void AnalysisVertical()							
+//  利用极大极小搜索算法 遍历博弈树
+//  并利用Alpha-Beta剪枝算法优化
+int MinMaxSearch(int x, int y, int NowPlayer, int depth, int alpha, int beta)
 {
-	int TempLine[LEN];
-	int r,c;
-	for(c=0; c<LEN; c++)
+	int score, NumOfAva;
+	if ( Win(x, y, NowPlayer) )
 	{
-		for(r=0; r<LEN; r++)
-		{
-			TempLine[r] = board[r][c];
-		}
-		ScanLine(TempLine, LEN);
+		return NowPlayer * WinScore;
 	}
-}
-
-// 分析棋盘横向15路棋型
-void AnalysisHorizontal()
-{
-	int TempLine[LEN];
-	int r,c;
-	for(r=0; r<LEN; r++)
+	else if ( Win(x, y, -NowPlayer) )
 	{
-		for(c=0; c<LEN; c++)
-		{
-			TempLine[c] = board[r][c];
-		}
-		ScanLine(TempLine, LEN);
+		return -NowPlayer * WinScore;
 	}
-}
 
-// 分析棋盘斜向42路棋型
-void AnalysisInclined()
-{
-	int TempLine1[LEN], TempLine2[LEN];
-	int x,y,i;
-
-// 自底向上22路
-	for(i=LEN-5; i>=0; i--)
+	if ( depth>=Difficulty )
 	{
-		for(x=i,y=0; x<LEN; x++,y++)
-		{
-			TempLine1[y] = board[x][y];
-			TempLine2[y] = board[LEN-1-y][x];
-		}
-		ScanLine(TempLine1, y);
-		ScanLine(TempLine2, y);
+		return EvalBoard(x, y, NowPlayer);
+	}
+	else if ( NowPlayer==AI )
+	{
+		int k, r, c;
+		Choice AvaChoices[LEN*LEN];
 
-// 自顶向下20路
-		if(i)
+//  调用启发式搜索函数 按序生成待遍历的子结点 
+		NumOfAva = HeuriSearchChoices( AvaChoices );
+
+		for (k=0; k<NumOfAva; k++)   	
 		{
-			for(x=0,y=i; y<LEN; x++,y++)
+			r = AvaChoices[k].r;
+			c = AvaChoices[k].c;
+
+			board[r][c] = AI;			// 临时落子 
+			score = MinMaxSearch(r, c, PLY, depth+1, alpha, beta); // 递归计算下一层分数 
+			board[r][c] = 0;			// 撤子
+
+			if (score > alpha)			// 对于AI，更新极大值 
 			{
-				TempLine1[x] = board[x][y];
-				TempLine2[x] = board[LEN-1-y][x];
-			}
-			ScanLine(TempLine1, x);
-			ScanLine(TempLine2, x);
-		}
-	}
-}
-
-// 分析线型棋型（核心函数） 
-void ScanLine(const int* const Line, int n)
-{
-	int i, j, k, cnt, InitPos, FinalPos, NowPlayer;
-	int LeftBlank, RightBlank, sumscore = 0;
-	int extra, ExtraBlank;
-
-	for (i=0; i<n; i++)
-	{
-		if ( Line[i] )
-		{
-//  利用 InitPos 记录始端位置 
-			InitPos = i-1;
-			NowPlayer = Line[i];
-
-//  利用 cnt 记录连子个数 
-			for (FinalPos=i, cnt=extra=ExtraBlank=0; FinalPos<n&&Line[FinalPos]==NowPlayer; FinalPos++)
-			{
-				cnt++;
-			}
-
-			if ( !Line[FinalPos] && FinalPos+1<n && Line[FinalPos+1]==NowPlayer ){
-				for(j=FinalPos+1; j<n&&Line[j]==NowPlayer; j++)
-					extra++;
-				if(cnt+extra>=3)
+				if (!depth)
 				{
-					FinalPos = j;
-					ExtraBlank = 1;	// 认同跳棋型 
+					AIChoice.r = r;
+					AIChoice.c = c;
 				}
-				else
-				{
-					extra=0;		// 不认同 
-				}
+				alpha = score;
 			}
-//  利用 FinalPos 记录末端位置 
-			i = FinalPos-1;
+			if (alpha >= beta)   		// Alpha-剪枝
+			{
+				return alpha;
+			}
+		}
+		return alpha;
+	}
+	else // if ( NowPlayer==PLY )
+	{
+		int r, c, k;
+		Choice AvaChoices[LEN*LEN];
 
-			if (cnt==1&&extra==0)
-			{
-				continue;
-			}
-			if (cnt>=5||extra>=5)
-			{
-				ChessType[NowPlayer].C5 ++;
-			}
+		NumOfAva = HeuriSearchChoices(AvaChoices);
 
-//  利用 Left/RightBlank 记录空白棋格个数 
-			for (k=InitPos, LeftBlank=0; k>=0&&LeftBlank<=2&&!Line[k]; k--)
-			{
-				LeftBlank++;
-			}
-			for (k=FinalPos, RightBlank=0; k<n&&RightBlank<=2&&!Line[k]; k++)
-			{
-				RightBlank++;
-			}
+		for (k=0; k<NumOfAva; k++)
+		{
+			r = AvaChoices[k].r;
+			c = AvaChoices[k].c;
 
-//  根据连子个数和空白棋格个数择出棋型 存入棋型哈希表
-			if(ExtraBlank==0)
+			board[r][c] = PLY;			// 临时落子 
+			score = MinMaxSearch(r, c, AI, depth+1, alpha, beta); // 递归计算下一层分数 
+			board[r][c] = 0;			// 撤子
+
+			if (score < beta)			// 对于玩家，更新极小值
 			{
-				switch(cnt)
-				{
-					case 2:
-						if ( LeftBlank>=2&&RightBlank || RightBlank>=2&&LeftBlank )
-							ChessType[NowPlayer].TA2 ++;
-						else if ( LeftBlank && RightBlank )
-							ChessType[NowPlayer].FA2 ++;
-						else if ( LeftBlank>=2 || RightBlank>=2 )
-							ChessType[NowPlayer].TS2 ++;
-						else if ( LeftBlank + RightBlank )
-							ChessType[NowPlayer].FS2 ++;
-						break;
-	
-					case 3:
-						if ( LeftBlank>=2&&RightBlank || RightBlank>=2&&LeftBlank )
-							ChessType[NowPlayer].TA3 ++;
-						else if ( LeftBlank && RightBlank )
-							ChessType[NowPlayer].FA3 ++;
-						else if ( LeftBlank>=2 || RightBlank>=2 )
-							ChessType[NowPlayer].TS3 ++;
-						else if ( LeftBlank + RightBlank )
-							ChessType[NowPlayer].FS3 ++;
-						break;
-	
-					case 4:
-						if ( LeftBlank && RightBlank )
-							ChessType[NowPlayer].A4 ++;
-						else if ( LeftBlank + RightBlank )
-							ChessType[NowPlayer].P4 ++;
-						break;
-				}
+				beta = score ;
 			}
-			else
+			if (alpha >= beta)   		// Beta-剪枝
 			{
-				if ( cnt==4&&LeftBlank || extra==4&&RightBlank )
-					ChessType[NowPlayer].A4 ++;
-				else if ( cnt+extra >= 4 )
-					ChessType[NowPlayer].P4 ++;
-				else // if (cnt+extra == 3)
+				return beta ;
+			}
+		}
+		return beta;
+	}
+}
+
+//  利用启发式搜索优化Alpha-Beta剪枝
+int HeuriSearchChoices( Choice* AvaChoices )
+{
+	int i,j,k,l,cnt,num,KillNum;
+	for (i=num=0; i<LEN; i++)
+	{
+		for (j=0; j<LEN; j++)
+		{
+
+			if ( !board[i][j] )
+			{
+				for (k=i-2, cnt=0; k<=i+2; k++)
 				{
-					if ( LeftBlank&&RightBlank )
-						ChessType[NowPlayer].TA3 ++;
-					else if ( LeftBlank||RightBlank )
-						ChessType[NowPlayer].TS3 ++;
+					for (l=j-2; l<=j+2; l++)
+					{
+						if ( board[k][l] )
+							cnt ++;
+					}
 				}
+
+				if (cnt)					// 如果距离2范围内有棋子，承认该点是可落子点 
+				{
+					AvaChoices[num].r = i;
+
+					AvaChoices[num].c = j;
+
+					AvaChoices[num].prior = 
+						EvalPrior(i, j, AI)
+					  + EvalPrior(i, j, PLY);// 根据 ai_evaluate.h 中的 EvalPrior 函数 
+											 // 对当前待落子点进行优先级评估
+					num++;
+				}
+
 			}
 		}
 	}
+
+	qsort( AvaChoices, num,					// 根据优先级评估分数进行排序 
+		sizeof(Choice), ChoiceCMP);
+
+	for (i=KillNum=0; i<num; i++)
+	{
+		if (AvaChoices[i].prior>=KillScore)
+		{
+			KillNum ++;
+		}
+		else break;
+	}
+
+	if( KillNum && KillNum+5<num )			// 出现杀棋时 进行剪枝
+		num = KillNum + 5 ;
+	return num;
 }
 
-//  对当前棋局分数进行评估
-int EvalBoard(int x, int y, int NowPlayer)
+// 用于快排的比较函数
+int ChoiceCMP(const void *a, const void *b)
 {
-	int SumScore = NowPlayer * WEIGHT[x][y];
-	memset (__ChessType, 0, sizeof(__ChessType));
-
-	AnalysisVertical();
-
-	AnalysisHorizontal();
-
-	AnalysisInclined();
-
-//  补充判断双冲四、双真活三、冲四活三棋型
-	if (ChessType[AI].P4 >=2)
-	{
-		ChessType[AI].DP4 ++;
-		ChessType[AI].P4 -=2;
-	}
-
-	if (ChessType[AI].TA3 >= 2)
-	{
-		ChessType[AI].DTA3 ++;
-		ChessType[AI].TA3 -=2;
-	}
-
-	if (ChessType[AI].P4 && ChessType[AI].TA3)
-	{
-		ChessType[AI].P4TA3 ++;
-		ChessType[AI].P4 --;
-		ChessType[AI].TA3 --;
-	}
-	
-	if (ChessType[PLY].P4 >=2)
-	{
-		ChessType[PLY].DP4 ++;
-		ChessType[PLY].P4 -=2;
-	}
-
-	if (ChessType[PLY].TA3 >= 2)
-	{
-		ChessType[PLY].DTA3 ++;
-		ChessType[PLY].TA3 -=2;
-	}
-
-	if (ChessType[PLY].P4 && ChessType[PLY].TA3)
-	{
-		ChessType[PLY].P4TA3 ++;
-		ChessType[PLY].P4 --;
-		ChessType[PLY].TA3 --;
-	}
-
-
-//  计算当前棋局总分
-	SumScore  += ChessType[AI].C5	 *  C5Score
-	          +  ChessType[AI].A4	 *  A4Score
-	          +  ChessType[AI].P4	 *  P4Score
-	          +  ChessType[AI].DP4   *  DP4Score
-	          +  ChessType[AI].P4TA3 *  P4TA3Score
-	          +  ChessType[AI].TA3   *  TA3Score
-	          +  ChessType[AI].DTA3  *  DTA3Score
-	          +  ChessType[AI].FA3   *  FA3Score
-	          +  ChessType[AI].TS3	 *  TS3Score
-	          +  ChessType[AI].FS3	 *  FS3Score
-	          +  ChessType[AI].TA2	 *  TA2Score
-	          +  ChessType[AI].FA2	 *  FA2Score
-	          +  ChessType[AI].TS2	 *  TS2Score
-	          +  ChessType[AI].FS2	 *  FS2Score
-
-	          -  ChessType[PLY].C5   *  C5Score
-	          -  ChessType[PLY].A4   *  A4Score
-	          -  ChessType[PLY].P4   *  P4Score
-	          -  ChessType[PLY].DP4  *  DP4Score
-	          -  ChessType[PLY].P4TA3*  P4TA3Score
-	          -  ChessType[PLY].TA3  *  TA3Score
-	          -  ChessType[PLY].DTA3 *  DTA3Score
-	          -  ChessType[PLY].FA3  *  FA3Score
-	          -  ChessType[PLY].TS3  *  TS3Score
-	          -  ChessType[PLY].FS3  *  FS3Score
-	          -  ChessType[PLY].TA2  *  TA2Score
-	          -  ChessType[PLY].FA2  *  FA2Score
-	          -  ChessType[PLY].TS2  *  TS2Score
-	          -  ChessType[PLY].FS2  *  FS2Score ;
-
-	return SumScore;
+	Choice *p=(Choice *)a, *q=(Choice *)b;
+	return p->prior < q->prior? 1:-1;
 }
 
-//  对某一落子点进行优先级值评估，用于启发式搜索中的排序参考 
-int EvalPrior(int x, int y, int NowPlayer)
+// 随机生成第一回合的AI落子点
+Chess RandFirst()
 {
-	int PriorScore = WEIGHT[x][y];
+	srand((unsigned)time(NULL));
 
-//  NowType存储当前棋型 
-	HashTable NowType = {0}; 
+	const int CTR = 7;
+	Chess ret;
 
-//  记录连子末端延伸方向的空格数
-	int up, dw, lf, rt, lu, ld, ru, rd;
-//  记录四向连子个数
-	int r, c, cnth, cntv, cntru, cntrd ;
-
-	cnth = cntv = cntru = cntrd = 1;
-	lf = rt = up = dw = lu = ld = ru = rd = 0;
-
-//  保存当前位置状态并临时落子 
-	int NowState = board[x][y];
-	board[x][y] = NowPlayer;
-
-//  横向快速扫描棋型
-	r=x, c=y+1;
-	while (c<LEN && board[r][c]==NowPlayer)
-		cnth++, c++;
-	while (c<LEN && !board[r][c] && rt<=2)
-		rt++, c++;
-
-	r=x, c=y-1;
-	while (c>=0 && board[r][c]==NowPlayer)
-		cnth++, c--;
-	while (c>=0 && !board[r][c] && lf<=2)
-		lf++, c--;
-
-//  纵向快速扫描棋型
-	r=x+1,c=y;
-	while (r<LEN && board[r][c]==NowPlayer)
-		cntv++,r++;
-	while (r<LEN && !board[r][c] && dw<=2)
-		dw++,r++;
-
-	r=x-1,c=y;
-	while (r>=0 && board[r][c]==NowPlayer)
-		cntv++,r--;
-	while (r>=0 && !board[r][c] && up<=2)
-		up++,r--;
-
-//  斜向上快速扫描棋型 
-	r=x-1,c=y+1;
-	while (r>=0 && c<LEN && board[r][c]==NowPlayer)
-		cntru++,r--,c++;
-	while (r>=0 && c<LEN && !board[r][c] && ru<=2)
-		ru++,r--,c++;
-
-	r=x+1, c=y-1;
-	while (r<LEN && c>=0 && board[r][c]==NowPlayer)
-		cntru++,r++,c--;
-	while (r<LEN && c>=0 && !board[r][c] && ld<=2)
-		ld++,r++,c--;
-
-//  斜向下快速扫描棋型 
-	r=x+1, c=y+1;
-	while (r<LEN && c<LEN && board[r][c]==NowPlayer)
-		cntrd++,r++,c++;
-	while (r<LEN && c<LEN && !board[r][c] && rd<=2)
-		rd++,r++,c++;
-
-	r=x-1, c=y-1;
-	while (r>=0 && c>=0 && board[r][c]==NowPlayer)
-		cntrd++,r--,c--;
-	while (r>=0 && c>=0 && !board[r][c] && lu<=2)
-		lu++,r--,c--;
-
-//  撤子，回归初始位置状态	
-	board[x][y] = NowState;
-
-//  对单子影响力进行评估： 
-
-	// 连五
-	if	(cnth >= 5 || cntv >= 5 || cntru >= 5 || cntrd >= 5)
-		return C5Score;
-
-	// 活四
-	if	(	( cnth == 4 && lf && rt )||( cntv == 4 && up && dw ) ||
-	        ( cntru== 4 && ld && ru )||( cntrd== 4 && lu && rd )
-	    )
-		return A4Score;
-	// 冲四
-	else {
-		NowType.P4 = ( cnth == 4 && lf+rt )+( cntv == 4 && up+dw ) +
-	        	     ( cntru== 4 && ld+ru )+( cntrd== 4 && lu+rd ) ;
-	    if (NowType.P4>=2)
-	    	return DP4Score;
+	int InitPosFlag = rand()%8;
+	switch( InitPosFlag )
+	{
+		case 0:
+			ret.r = CTR-1; ret.c = CTR-1;
+			break;
+		case 1:
+			ret.r = CTR-1; ret.c = CTR;
+			break;
+		case 2:
+			ret.r = CTR-1; ret.c = CTR+1;
+			break;
+		case 3:
+			ret.r = CTR;   ret.c = CTR-1;
+			break;
+		case 4:
+			ret.r = CTR;   ret.c = CTR+1;
+			break;
+		case 5:
+			ret.r = CTR+1; ret.c = CTR-1;
+			break;
+		case 6:
+			ret.r = CTR+1; ret.c = CTR;
+			break;
+		case 7:
+			ret.r = CTR+1; ret.c = CTR+1;
+			break;
 	}
+	return ret;
+}
 
-	// 双真活三
- 	NowType.TA3 = (cnth == 3 && ( lf>=2&&rt || rt>=2&&lf )) +
-			      (cntv == 3 && ( up>=2&&dw || dw>=2&&up )) +
-			      (cntru== 3 && ( ld>=2&&ru || ru>=2&&ld )) +
-			      (cntrd== 3 && ( lu>=2&&rd || rd>=2&&lu )) ;
-	if (NowType.TA3>=2)
-		return DTA3Score;
-	// 冲四活三 
-	else if (NowType.TA3&&NowType.P4)
-		return P4TA3Score;
-	// 真活三
-	else if (NowType.TA3)
-		return TA3Score;
-		
-	else if(( cnth == 3 && lf && rt ) || ( cntv == 3 && up && dw ) ||
-	        ( cntru== 3 && ld && ru ) || ( cntrd== 3 && lu && rd )
-	    )
-		return PriorScore + FA3Score;
-	// 真眠三
-	else if(( cnth == 3 && (lf>=2||rt>=2) ) || ( cntv == 3 && (up>=2||dw>=2) ) ||
-	        ( cntru== 3 && (ld>=2||ru>=2) ) || ( cntrd== 3 && (lu>=2||rd>=2) )
-	    )
-		return PriorScore + TS3Score;
-	// 伪眠三
-	else if(( cnth == 3 && lf+rt ) || ( cntv == 3 && up+dw ) ||						
-	        ( cntru== 3 && ld+ru ) || ( cntrd== 3 && lu+rd )
-	    )
-		PriorScore += FS3Score;
-	// 双真活二
-	NowType.TA2 = (cnth == 2 && ( lf>=2&&rt || rt>=2&&lf )) +
-			      (cntv == 2 && ( up>=2&&dw || dw>=2&&up )) +
-			      (cntru== 2 && ( ld>=2&&ru || ru>=2&&ld )) +
-			      (cntrd== 2 && ( lu>=2&&rd || rd>=2&&lu )) ;
-	if  ( NowType.TA2>=2 )
-		return PriorScore += 1.2*TA2Score;
-	// 真活二
-	else if( NowType.TA2 )
-		return PriorScore += TA2Score;
-	// 伪活二
-	else if(( cnth == 2 && lf && rt ) || ( cntv == 2 && up && dw ) ||
-	        ( cntru== 2 && ld && ru ) || ( cntrd== 2 && lu && rd )
-	    )
-		return PriorScore += FA2Score;
-	// 真眠二
-	else if(( cnth == 2 && (lf>=2||rt>=2) ) || ( cntv == 2 && (up>=2||dw>=2) ) ||
-	        ( cntru== 2 && (ld>=2||ru>=2) ) || ( cntrd== 2 && (lu>=2||rd>=2) )
-	    )
-		return PriorScore += TS2Score;
-	// 伪眠二
-	else if(( cnth == 2 && lf+rt ) || ( cntv == 2 && up+dw ) ||						
-	        ( cntru== 2 && ld+ru ) || ( cntrd== 2 && lu+rd )
-	    )
-		PriorScore += FS2Score;
+// 胜负判断，判断NowPlayer是否胜利 
+int Win(int x, int y, int NowPlayer)
+{
+	int r, c, cnt;
 
-	return PriorScore;
+	r=x, c=y, cnt=0;
+	while (c<LEN && board[r][c] == NowPlayer)
+		cnt++, c++;
+	c = y-1;
+	while ( c>=0 && board[r][c] == NowPlayer)
+		cnt++, c--;
+	if (cnt>=5)
+		return 1;
+
+	r=x, c=y, cnt=0;
+	while ( r<LEN && board[r][c] == NowPlayer)
+		cnt++, r++;
+	r = x-1;
+	while (  r>=0 && board[r][c] == NowPlayer)
+		cnt++, r--;
+	if (cnt>=5)
+		return 1;
+
+	r=x, c=y, cnt=0;
+	while ( c<LEN && r<LEN && board[r][c] == NowPlayer)
+		cnt++,c++,r++;
+	c=y-1, r=x-1;
+	while ( r>=0  && c>=0  && board[r][c] == NowPlayer)
+		cnt++, c--, r--;
+	if (cnt>=5)
+		return 1;
+
+	r=x, c=y, cnt=0;
+	while ( c<LEN && r>=0  && board[r][c] == NowPlayer)
+		cnt++, c++, r--;
+	c=y-1, r=x+1;
+	while ( c>=0  && r<LEN && board[r][c] == NowPlayer)
+		cnt++, c--, r++;
+	if (cnt>=5)
+		return 1;
+
+	return 0;
 }
