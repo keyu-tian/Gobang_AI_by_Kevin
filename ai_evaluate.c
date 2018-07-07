@@ -12,32 +12,32 @@ const int P4TA3Score=  18500;	 // 冲四活三
 const int TA3Score  =  5100;	 // 真活三
 const int DTA3Score =  15000;	 // 双真活三
 //const int FA3Score  =  399;	 // 伪活三历史 
-const int FA3Score  =  449;		 // 伪活三
-const int TS3Score  =  500;		 // 真眠三
-const int FS3Score  =  274;		 // 伪眠三
-const int TA2Score  =  400;		 // 真活二
-const int FA2Score  =  99;		 // 伪活二
-const int TS2Score  =  175;		 // 真眠二
-const int FS2Score  =  49;		 // 伪眠二
+const int FA3Score  =  449;	 // 伪活三
+const int TS3Score  =  500;	 // 真眠三
+const int FS3Score  =  274;	 // 伪眠三
+const int TA2Score  =  400;	 // 真活二
+const int FA2Score  =  99;	 // 伪活二
+const int TS2Score  =  175;	 // 真眠二
+const int FS2Score  =  49;	 // 伪眠二
 
 
 // 哈希表（桶） 存储当前棋型
 typedef struct _HashTable{
 
-	char C5;		// 连五
-	char A4;		// 活四 
-	char P4;		// 冲四 
-	char DP4;		// 双冲四
-	char P4TA3;		// 冲四活三
-	char TA3;		// 真活三 
-	char DTA3;		// 双真活三 
-	char FA3;		// 伪活三 
-	char TS3;		// 真眠三 
-	char FS3;		// 伪眠三 
-	char TA2;		// 真活二 
-	char FA2;		// 伪活二 
-	char TS2;		// 真眠二 
-	char FS2;		// 伪眠二 
+	char C5;	// 连五
+	char A4;	// 活四 
+	char P4;	// 冲四 
+	char DP4;	// 双冲四
+	char P4TA3;	// 冲四活三
+	char TA3;	// 真活三 
+	char DTA3;	// 双真活三 
+	char FA3;	// 伪活三 
+	char TS3;	// 真眠三 
+	char FS3;	// 伪眠三 
+	char TA2;	// 真活二 
+	char FA2;	// 伪活二 
+	char TS2;	// 真眠二 
+	char FS2;	// 伪眠二 
 
 } HashTable;
 
@@ -141,7 +141,7 @@ void ScanLine(const int* const Line, int n)
 				}
 				else
 				{
-					extra=0;		// 不认同 
+					extra=0;	// 不认同 
 				}
 			}
 //  利用 FinalPos 记录末端位置 
