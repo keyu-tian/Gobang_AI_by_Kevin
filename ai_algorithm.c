@@ -3,8 +3,8 @@
 #include "ai_algorithm.h"
 #include "ai_evaluate.h"
 
-const int WinScore = 140000;	// 与 C5Score 保持同步
-const int KillScore = 15100;	// 与DTA3Score保持同步
+const int WinScore = 135000;	// 与 C5Score 保持同步
+const int KillScore = 15000;	// 与DTA3Score保持同步
 const int Difficulty = 5;		// 设定AI难度
 
 
@@ -41,7 +41,7 @@ int MinMaxSearch(int x, int y, int NowPlayer, int depth, int alpha, int beta)
 
 			board[r][c] = AI;			// 临时落子 
 			score = MinMaxSearch(r, c, PLY, depth+1, alpha, beta); // 递归计算下一层分数 
-			board[r][c] = 0;			// 撤子
+			board[r][c] = 0;			// 撤子（回溯）
 
 			if (score > alpha)			// 对于AI，更新极大值 
 			{
@@ -116,8 +116,8 @@ int HeuriSearchChoices( Choice* AvaChoices )
 
 					AvaChoices[num].prior = 
 						EvalPrior(i, j, AI)
-					  + EvalPrior(i, j, PLY);// 根据 ai_evaluate.h 中的 EvalPrior 函数 
-								// 对当前待落子点进行优先级评估
+					  + EvalPrior(i, j, PLY); // 根据 ai_evaluate.h 中的 EvalPrior 函数 
+								  // 对当前待落子点进行优先级评估
 					num++;
 				}
 
