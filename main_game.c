@@ -14,22 +14,22 @@ const int INF = 9999999;			// A-B剪枝的初始化极值
 const char* OFS = "●";				// 黑方棋子
 const char* DEF = "○";				// 白方棋子
 Chessid player;
-int rnd;							// 记录行棋方和回合
-char offensive;						// 记录先手方
+int rnd;					// 记录行棋方和回合
+char offensive;					// 记录先手方
 
 Chessid board[GRID_N][GRID_N];
 
-const Point BoardCenter(7,9);		// 棋盘正中位置坐标（屏幕坐标系）
-Point cursor;						// 光标位置坐标 （屏幕坐标系）
-Point AIChoice;						// 记录最高评分位置 
+const Point BoardCenter(7,9);			// 棋盘正中位置坐标（屏幕坐标系）
+Point cursor;					// 光标位置坐标 （屏幕坐标系）
+Point AIChoice;					// 记录最高评分位置 
 
 long long D_search_cnt, D_eval_cnt, D_cut_hur, D_cut_ab, D_cut_kill, D_rep_cnt;
 
 void AIGame(int mode)
 {
 	int IsFirstRound;
-	char key;					// 记录玩家键盘输入
-	Point NowChess;		    	// 记录当前落子点
+	char key;				// 记录玩家键盘输入
+	Point NowChess;		    		// 记录当前落子点
 
 	while (1)
 	{
@@ -38,7 +38,7 @@ void AIGame(int mode)
 
 		if ( offensive=='a' )	// 如果AI是先手 
 		{
-			AITurn();			// AI下第一步棋 
+			AITurn();		// AI下第一步棋 
 		}
 
 		while (1)
@@ -52,7 +52,7 @@ void AIGame(int mode)
 				GotoXY(4*cursor.x, 2*cursor.y);
 			}
 
-			if (key == ESC)				// 按下ESC，退出程序 
+			if (key == ESC)			// 按下ESC，退出程序 
 			{
 				exit(0);
 			}
@@ -64,30 +64,6 @@ void AIGame(int mode)
 			{
 				break;
 			}
-//			else if (key == 'r')
-//			{
-//				Point re = retract();
-//				if(re.x>=0)
-//				{
-//					int x = abs(cursor.x-re.x);
-//					int y = abs(cursor.y-2-re.y);
-//	
-//					if (cursor.x - x>0)
-//						for (int i = 0; i < x; i++)
-//							MoveCursor(LEFT);
-//					else for (int i = 0; i < x; i++)
-//							MoveCursor(RIGHT);
-//	
-//					if (cursor.y - 2 - y>0)
-//						for (int i = 0; i < y; i++)
-//							MoveCursor(UP);
-//					else for (int i = 0; i < y; i++)
-//							MoveCursor(DOWN);
-//					printf("+ ");
-//					player = 3-player;
-//					rnd--;
-//				}
-//			}
 			else if (key == ' ')		// 按下空格，判断是否可以落子，若可以则落下玩家的棋子
 			{
 				if (player == H1_CHESS)
@@ -191,13 +167,11 @@ Point AITurn()
 		int D_now_score = minMaxSearch(player, 0, -INF, INF);
 
 #ifdef __DEBUG
-		int rate_x = 60*rnd+rand()%700, rate_y = 9500+rand()%2500;
-		double rate_dot = (rate_x - 10.0*rand()/RAND_MAX) / rate_y;
 
 		GotoXY(3, 35);printf("                                                                                             ");
 		GotoXY(3, 35);printf(" AI 评分： %d\t\t估值次数： %lld", D_now_score, D_eval_cnt);
 		GotoXY(3, 36);printf("                                                                                             ");
-		GotoXY(3, 36);printf(" VCF VCT： %lld\t\t剪枝发生： %lld\t\t置换表命中率： %%%.1f",D_search_cnt, D_cut_hur+D_cut_ab+D_cut_kill, 100*rate_dot);
+		GotoXY(3, 36);printf(" VCF VCT： %lld\t\t剪枝发生： %lld\t\t",D_search_cnt, D_cut_hur+D_cut_ab+D_cut_kill);
 		GotoXY(3, 37);printf("                                                                                             ");
 		GotoXY(3, 37);printf(" AB 剪枝： %lld\t\t迭代加深中断： %lld\t\t启发式搜索非安全剪枝： %lld", D_cut_ab, D_cut_kill, D_cut_hur);
 		if (D_now_score>=135000/2 || D_now_score<=-135000/2)
