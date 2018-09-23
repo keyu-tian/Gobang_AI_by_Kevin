@@ -1,8 +1,8 @@
-#include <cstdio>
-#include <cstdlib>
+#include <stdio.h>
+#include <stdlib.h>
 #include <conio.h>
 #include <Windows.h>
-#include <ctime>
+#include <time.h>
 
 #include "main_game.h"
 #include "controller.h"
