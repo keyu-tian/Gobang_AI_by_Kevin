@@ -1,8 +1,8 @@
 /**
- * Name: game.h
+ * Name: main_game.h
  * Author: Kevin
  * Date: 2018-06-03
- * Description: 游戏主要框架 
+ * Description: 游戏主要逻辑 
  */
 
 #ifndef _MAIN_GAME_H
