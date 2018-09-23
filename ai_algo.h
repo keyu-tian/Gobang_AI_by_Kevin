@@ -1,5 +1,5 @@
 /**
- * Name: ai_algorithm.h
+ * Name: ai_algo.h
  * Author: Kevin
  * Date: 2018-06-03
  * Description: AI关键算法
