@@ -1,5 +1,5 @@
 /**
- * Name: game.h
+ * Name: eval_board.h
  * Author: Kevin
  * Date: 2018-06-03
  * Description: AI估值 
